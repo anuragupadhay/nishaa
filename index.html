@@ -136,25 +136,40 @@
     document.getElementById('next1').onclick = () => {
       stopSorry();
       setBackground('--red'); showPage(2); startHearts();
+      unmuteAudio();
     };
     document.getElementById('next2').onclick = () => {
       setBackground('--pink'); showPage(3); startHearts();
+      unmuteAudio();
     };
     document.getElementById('next3').onclick = () => {
       setBackground('--purple'); showPage(4); startHearts();
+      unmuteAudio();
     };
     document.getElementById('next4').onclick = () => {
       setBackground('--cream'); showPage(5); startHearts();
+      unmuteAudio();
     };
     document.getElementById('next5').onclick = () => {
       setBackground('--dark'); showPage(6); startHearts();
+      unmuteAudio();
     };
     document.getElementById('happyBtn').onclick = () => {
       setBackground('--pink'); showPage(7); startHearts();
+      unmuteAudio();
     };
     document.getElementById('notHappyBtn').onclick = () => {
       setBackground('--pink'); showPage(7); startHearts();
+      unmuteAudio();
     };
+
+    function unmuteAudio(){
+      const audio = document.getElementById('background-audio');
+      if(audio.muted){
+        audio.muted = false;
+        audio.play().catch(() => { /* handle autoplay rejection */ });
+      }
+    }
 
     function showPage(n){
       for(let i=1;i<=7;i++){
