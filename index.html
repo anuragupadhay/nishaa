@@ -13,7 +13,8 @@
     body{
       display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Poppins,sans-serif; color:#fff; transition:background .7s ease;
-      background:var(--black); overflow:hidden;
+      background:var(--black);
+      overflow:auto; /* <-- Changed from overflow:hidden */
     }
     .wrap{max-width:900px;width:100%;padding:24px}
     .hidden{display:none}
@@ -222,5 +223,4 @@
     }
   </script>
 </body>
-
 </html>
