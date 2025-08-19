@@ -14,10 +14,10 @@
       display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Poppins,sans-serif; color:#fff; transition:background .7s ease;
       background:var(--black);
-      overflow:auto; /* Ensures scrollable content if needed */
+      overflow:auto;
       position: relative;
     }
-    .wrap{max-width:900px;width:100%;padding:24px; z-index: 1; position: relative;}
+    .wrap{max-width:900px;width:100%;padding:24px; z-index: 2; position: relative;}
     .hidden{display:none}
     .message{font-size:24px;line-height:1.6;margin:16px auto}
     .title{font-weight:800;font-size:32px;margin-bottom:12px}
@@ -39,36 +39,44 @@
     @keyframes floatUp{0%{transform:translateY(0) scale(1);opacity:.9}100%{transform:translateY(-110vh) scale(1.4);opacity:0}}
     section{position:relative;z-index:1}
 
-    /* Hidden iframe container */
+    /* YouTube player container hidden offscreen */
     #yt-background-player {
       position: fixed;
+      left: -9999px;
+      top: -9999px;
       width: 0;
       height: 0;
-      overflow: hidden;
-      left: 0;
-      top: 0;
-      z-index: 0;
-      pointer-events: none;
       opacity: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #unmuteButton {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 10;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: var(--pink);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      color: #111;
+      display: none; /* shown after play starts muted */
     }
   </style>
 </head>
 <body id="screen">
 
-  <!-- YouTube embed as background music -->
-  <div id="yt-background-player">
-    <iframe width="560" height="315"
-      src="https://www.youtube.com/embed/JuqQvcuK9Fo?si=bcg-UtK4kAAiZPdP&start=10&autoplay=1&loop=1&playlist=JuqQvcuK9Fo"
-      title="YouTube video player"
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      allowfullscreen
-      allow="autoplay"
-      >
-    </iframe>
-  </div>
+  <!-- YouTube Player API container (hidden) -->
+  <div id="yt-background-player"></div>
+
+  <button id="unmuteButton">Unmute Music 🔊</button>
 
   <div class="wrap">
+    <!-- Your existing content here -->
+
     <!-- Page 1 -->
     <section id="page1">
       <div id="msg1" class="message hidden">
@@ -151,7 +159,45 @@
     </section>
   </div>
 
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script>
+    let player;
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('yt-background-player', {
+        height: '315',
+        width: '560',
+        videoId: 'JuqQvcuK9Fo',
+        playerVars: {
+          autoplay: 1,
+          controls: 0,
+          modestbranding: 1,
+          loop: 1,
+          playlist: 'JuqQvcuK9Fo',
+          mute: 1,
+          start: 10,
+          rel: 0,
+          fs: 0,
+          disablekb: 1,
+          iv_load_policy: 3
+        },
+        events: {
+          'onReady': onPlayerReady
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      event.target.playVideo();
+      // Show unmute button after autoplay starts
+      document.getElementById('unmuteButton').style.display = 'block';
+    }
+
+    document.getElementById('unmuteButton').onclick = function() {
+      player.unMute();
+      this.style.display = 'none';
+    };
+
+    // Your page navigation and effects script below unchanged
     let sorryInterval = null;
     let heartInterval = null;
 
@@ -164,36 +210,26 @@
     document.getElementById('next1').onclick = () => {
       stopSorry();
       setBackground('--red'); showPage(2); startHearts();
-      unmuteAudio();
+      // The YouTube player is already unmuted/unmuted on button press
     };
     document.getElementById('next2').onclick = () => {
       setBackground('--pink'); showPage(3); startHearts();
-      unmuteAudio();
     };
     document.getElementById('next3').onclick = () => {
       setBackground('--purple'); showPage(4); startHearts();
-      unmuteAudio();
     };
     document.getElementById('next4').onclick = () => {
       setBackground('--cream'); showPage(5); startHearts();
-      unmuteAudio();
     };
     document.getElementById('next5').onclick = () => {
       setBackground('--dark'); showPage(6); startHearts();
-      unmuteAudio();
     };
     document.getElementById('happyBtn').onclick = () => {
       setBackground('--pink'); showPage(7); startHearts();
-      unmuteAudio();
     };
     document.getElementById('notHappyBtn').onclick = () => {
       setBackground('--pink'); showPage(7); startHearts();
-      unmuteAudio();
     };
-
-    function unmuteAudio(){
-      // Since we removed the audio tag, you can remove this or keep it empty
-    }
 
     function showPage(n){
       for(let i=1;i<=7;i++){
@@ -219,10 +255,9 @@
       document.querySelectorAll('.particle').forEach(p=>{ if(p.dataset.kind==='sorry') p.remove(); });
     }
 
-    // Hearts (2x speed flow)
     function startHearts(){
       if(heartInterval) return;
-      heartInterval = setInterval(()=>spawnParticle('❤', ''), 200); // 2x faster spawn
+      heartInterval = setInterval(()=>spawnParticle('❤', ''), 200);
     }
     function stopHearts(){
       if(heartInterval){ clearInterval(heartInterval); heartInterval=null; }
@@ -235,7 +270,7 @@
       el.textContent = text;
       el.style.left = Math.random() * (window.innerWidth - 40) + 'px';
       el.style.fontSize = (18 + Math.random()*26) + 'px';
-      el.style.animationDuration = (2 + Math.random()*3) + 's'; // 2x faster float
+      el.style.animationDuration = (2 + Math.random()*3) + 's';
       if(color) el.style.color = color;
 
       if(text === 'SORRY'){ el.dataset.kind='sorry'; }
